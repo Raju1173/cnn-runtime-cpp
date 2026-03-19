@@ -15,7 +15,7 @@ This project is an attempt to rebuild a small CNN runtime from first principles,
 ### Tensors
 - Manual memory management (raw pointers)
 - Explicit shape tracking
-- Contiguous storage
+- Contiguous storage (row major layout)
 
 ### Numerical Operations
 - Element-wise addition
