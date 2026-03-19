@@ -27,13 +27,13 @@ This project is an attempt to rebuild a small CNN runtime from first principles,
 - Compiler auto-vectorization
 - Cache blocking (tiling)
 
+Achieved ~25 GFLOPS on 512×512 matrices on a single core.
+
 ### Layers & Transformations
 
 - im2col
 - Reshape
 - 2D Convolution (im2col + GEMM).
-
-Achieved ~25 GFLOPS on 512×512 matrices on a single core.
 
 ## GEMM Benchmarks (512×512)
 
