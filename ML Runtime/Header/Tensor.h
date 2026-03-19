@@ -19,7 +19,7 @@ struct Tensor
 
 	Tensor(const std::vector<size_t>& shape);
 
-	Tensor im2col(size_t R, size_t S);
+	Tensor im2col(size_t R, size_t S) const;
 
 	void zeros();
 
@@ -33,5 +33,7 @@ struct Tensor
 void add(const Tensor& a, const Tensor& b, Tensor& out);
 
 void GEMM(const Tensor& a, const Tensor& b, Tensor& out);
+
+Tensor reshape(const Tensor& input, const std::vector<size_t>& newShape);
 
 Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias);

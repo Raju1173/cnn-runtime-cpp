@@ -127,23 +127,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Allocator.cpp" />
-    <ClCompile Include="ExecutionGraph.cpp" />
-    <ClCompile Include="GraphDemo.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="GEMMBench.cpp" />
-    <ClCompile Include="MemoryBench.cpp" />
-    <ClCompile Include="MemoryTest.cpp" />
-    <ClCompile Include="Profiler.cpp" />
-    <ClCompile Include="Tensor.cpp" />
-    <ClCompile Include="TestTensor.cpp" />
+    <ClCompile Include="SourceFiles\ExecutionGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Allocator.h" />
-    <ClInclude Include="ExecutionGraph.h" />
-    <ClInclude Include="Profiler.h" />
-    <ClInclude Include="Tensor.h" />
-    <ClInclude Include="Utils.h" />
+    <ClInclude Include="Header\ExecutionGraph.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

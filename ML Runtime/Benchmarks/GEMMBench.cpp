@@ -2,7 +2,7 @@
 #include <chrono>
 #include <iostream>
 
-/*void benchmark(size_t N)
+void benchmark(size_t N)
 {
     Tensor A({ N,N });
     Tensor B({ N,N });
@@ -34,4 +34,4 @@ int main()
     benchmark(128);
     benchmark(256);
     benchmark(512);
-}*/
+}

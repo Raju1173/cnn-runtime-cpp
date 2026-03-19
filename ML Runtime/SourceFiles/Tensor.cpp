@@ -1,4 +1,4 @@
-#include "Tensor.h"
+#include "Header/Tensor.h"
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
@@ -34,7 +34,7 @@ inline void add(const Tensor& a, const Tensor& b, Tensor& out)
 
 void GEMM(const Tensor& a, const Tensor& b, Tensor& out)
 {
-	if (a.shape.size() != 2 || b.shape.size() != 2 || out.shape.size() != 2) 
+	if (a.shape.size() != 2 || b.shape.size() != 2 || out.shape.size() != 2)
 		throw std::runtime_error("matmul : only 2D tensors supported");
 
 	size_t m = a.shape[0];
@@ -109,24 +109,24 @@ void GEMM(const Tensor& a, const Tensor& b, Tensor& out)
 	//Naive GEMM :
 
 	/*
-	for (size_t i = 0; i < m; i++) 
+	for (size_t i = 0; i < m; i++)
 	{
-		for (size_t j = 0; j < n; j++) 
+		for (size_t j = 0; j < n; j++)
 		{
 			float sum = 0.0f;
 
-			for (size_t k = 0; k < kA; k++) 
+			for (size_t k = 0; k < kA; k++)
 			{
 				sum += a.pData[i * kA + k] * b.pData[k * n + j];
 			}
-        
+
 			out.pData[i * n + j] = sum;
 		}
 	}
 	*/
 }
 
-Tensor Tensor::im2col(size_t R, size_t S)
+Tensor Tensor::im2col(size_t R, size_t S) const
 {
 	size_t C = shape[0];
 	size_t H = shape[1];
@@ -135,12 +135,12 @@ Tensor Tensor::im2col(size_t R, size_t S)
 	size_t H_out = H - R + 1;
 	size_t W_out = W - S + 1;
 
-	size_t out_rows = C * R * S;
-	size_t out_cols = H_out * W_out;
+	size_t outRows = C * R * S;
+	size_t outCols = H_out * W_out;
 
-	Tensor out({ out_rows, out_cols });
+	Tensor out({ outRows, outCols });
 
-	float* out_data = out.pData;
+	float* outData = out.pData;
 
 	for (size_t c = 0; c < C; c++)
 	{
@@ -159,7 +159,7 @@ Tensor Tensor::im2col(size_t R, size_t S)
 						size_t in_row = h_out + r;
 						size_t in_col = w_out + s;
 
-						out_data[row * out_cols + col] = pData[c * H * W + in_row * W + in_col];
+						outData[row * outCols + col] = pData[c * H * W + in_row * W + in_col];
 					}
 				}
 			}
@@ -169,12 +169,32 @@ Tensor Tensor::im2col(size_t R, size_t S)
 	return out;
 }
 
-/*Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias)
+Tensor reshape(const Tensor& input, const std::vector<size_t>& newShape)
+{
+	size_t newNumel = 1;
+
+	for (size_t dim : newShape)
+	{
+		newNumel *= dim;
+	}
+
+	if (newNumel != input.numel)
+		throw std::runtime_error("reshape : numel mismatch");
+
+	Tensor out(newShape);
+
+	std::copy(input.pData, input.pData + input.numel, out.pData);
+
+	return out;
+}
+
+Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias)
 {
 	size_t H = input.shape[1];
 	size_t W = input.shape[2];
 
 	size_t K = weights.shape[0];
+	size_t C = weights.shape[1];
 	size_t R = weights.shape[2];
 	size_t S = weights.shape[3];
 
@@ -182,7 +202,7 @@ Tensor Tensor::im2col(size_t R, size_t S)
 	size_t W_out = W - S + 1;
 
 	Tensor col = input.im2col(R, S);
-	Tensor w_flat = reshapeWeights(weights);
+	Tensor w_flat = reshape(weights, { K, C * R * S });
 
 	Tensor out({ K, H_out * W_out });
 
@@ -199,8 +219,8 @@ Tensor Tensor::im2col(size_t R, size_t S)
 		}
 	}
 
-	return reshape3D(out, K, H_out, W_out);
-}*/
+	return reshape(out, { K, H_out, W_out });
+}
 
 inline void Tensor::zeros()
 {
