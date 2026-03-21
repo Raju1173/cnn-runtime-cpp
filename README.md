@@ -42,6 +42,6 @@ Achieved ~25 GFLOPS on 512×512 matrices on a single core.
 | Naive (ijk)        | ~66 ms    |
 | Reordered (ikj)    | ~43 ms    |
 | + pointer reuse    | ~13 ms    |
-| + blocking         | ~10.4 ms  |
+| + blocking(64 X 64)| ~10.4 ms  |
 
 CPU : Intel(R) Core(TM) i5-13420H (13th Gen)
