@@ -52,7 +52,7 @@ void GEMM(const Tensor& a, const Tensor& b, Tensor& out)
 
 	//Blocked + Reordered GEMM :
 
-	int BlockSize = 128;
+	int BlockSize = 64;
 
 	for (size_t ii = 0; ii < m; ii += BlockSize)
 	{
