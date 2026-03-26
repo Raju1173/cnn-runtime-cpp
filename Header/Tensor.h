@@ -21,6 +21,8 @@ struct Tensor
 
 	Tensor im2col(size_t R, size_t S) const;
 
+	inline void RELU();
+
 	void zeros();
 
 	void fillRandom();
