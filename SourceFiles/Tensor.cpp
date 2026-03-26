@@ -169,9 +169,9 @@ Tensor Tensor::im2col(size_t R, size_t S) const
 	return out;
 }
 
-inline void Tensor::RELU()
+void Tensor::RELU()
 {
-	for (int i = 0; i < numel; i++)
+	for (size_t i = 0; i < numel; i++)
 	{
 		pData[i] = std::max(pData[i], 0.0f);
 	}
