@@ -1,4 +1,4 @@
-#include "Header/Tensor.h"
+#include "Tensor.h"
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
@@ -18,7 +18,7 @@ Tensor::~Tensor()
 	free(pData);
 }
 
-inline void add(const Tensor& a, const Tensor& b, Tensor& out)
+void add(const Tensor& a, const Tensor& b, Tensor& out)
 {
 	if (a.numel != b.numel)
 		throw std::runtime_error("add : numel mismatch");
@@ -35,7 +35,7 @@ inline void add(const Tensor& a, const Tensor& b, Tensor& out)
 void GEMM(const Tensor& a, const Tensor& b, Tensor& out)
 {
 	if (a.shape.size() != 2 || b.shape.size() != 2 || out.shape.size() != 2)
-		throw std::runtime_error("matmul : only 2D tensors supported");
+		throw std::runtime_error("GEMM : only 2D tensors supported");
 
 	size_t m = a.shape[0];
 	size_t kA = a.shape[1];
@@ -43,16 +43,16 @@ void GEMM(const Tensor& a, const Tensor& b, Tensor& out)
 	size_t n = b.shape[1];
 
 	if (out.shape[0] != m || out.shape[1] != n)
-		throw std::runtime_error("matmul : output shape mismatch");
+		throw std::runtime_error("GEMM : output shape mismatch");
 
 	if (kA != kB)
-		throw std::runtime_error("matmul : shape mismatch");
+		throw std::runtime_error("GEMM : shape mismatch");
 
 	out.zeros();
 
 	//Blocked + Reordered GEMM :
 
-	int BlockSize = 128;
+	int BlockSize = 64;
 
 	for (size_t ii = 0; ii < m; ii += BlockSize)
 	{
@@ -222,7 +222,7 @@ Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& b
 	return reshape(out, { K, H_out, W_out });
 }
 
-inline void Tensor::zeros()
+void Tensor::zeros()
 {
 	for (size_t i = 0; i < numel; i++)
 	{
@@ -230,7 +230,7 @@ inline void Tensor::zeros()
 	}
 }
 
-inline void Tensor::fillRandom()
+void Tensor::fillRandom()
 {
 	for (size_t i = 0; i < numel; i++)
 	{

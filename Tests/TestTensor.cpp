@@ -18,9 +18,9 @@ void testGEMM()
 	C.print();
 }
 
-/*int main()
+int main()
 {
 	testGEMM();
 
 	return 0;
-}*/
+}
