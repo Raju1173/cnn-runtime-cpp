@@ -3,8 +3,9 @@
 #include<cstddef>
 #include<iostream>
 
-struct Tensor 
+class Tensor
 {
+public :
 	float* pData;
 	std::vector<size_t> shape;
 	size_t numel;
