@@ -42,7 +42,7 @@ void BenchIm2Col(size_t N)
 
 	for (int i = 0;i < runs;i++)
 	{
-		im2col(input, 3, 3);
+		Im2col(input, 3, 3);
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();

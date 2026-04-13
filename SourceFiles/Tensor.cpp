@@ -86,7 +86,6 @@ Tensor GEMM(const Tensor& a, const Tensor& b)
 		}
 	}
 
-
 	//Reordered GEMM :
 
 	/*
@@ -125,6 +124,8 @@ Tensor GEMM(const Tensor& a, const Tensor& b)
 		}
 	}
 	*/
+
+	return out;
 }
 
 Tensor Im2col(const Tensor& input, size_t R, size_t S)
@@ -317,29 +318,33 @@ void Tensor::fillRandom()
 	}
 }
 
-void Tensor::print()
+std::ostream& operator<<(std::ostream& os, const Tensor& t)
 {
-	if (shape.size() == 2)
+	if (t.shape.size() == 2)
 	{
-		size_t rows = shape[0];
-		size_t cols = shape[1];
+		size_t rows = t.shape[0];
+		size_t cols = t.shape[1];
 
 		for (size_t i = 0; i < rows; i++)
 		{
 			for (size_t j = 0; j < cols; j++)
 			{
-				std::cout << pData[i * cols + j] << " ";
+				os << t.pData[i * cols + j] << " ";
 			}
-			std::cout << "\n";
+
+			os << "\n";
 		}
 	}
 
 	else
 	{
-		for (size_t i = 0; i < numel; i++)
+		for (size_t i = 0; i < t.numel; i++)
 		{
-			std::cout << pData[i] << " ";
+			os << t.pData[i] << " ";
 		}
-		std::cout << "\n";
+
+		os << "\n";
 	}
+
+	return os;
 }
