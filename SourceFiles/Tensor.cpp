@@ -223,6 +223,8 @@ Tensor MaxPool(const Tensor& input, MaxPoolCache& cache)
 
 	Tensor out({ C, H_out, W_out });
 
+	cache.indices.resize(C * H_out * W_out);
+
 	for (size_t c = 0; c < C; c++)
 	{
 		for (size_t h_out = 0; h_out < H_out; h_out++)
@@ -233,10 +235,26 @@ Tensor MaxPool(const Tensor& input, MaxPoolCache& cache)
 				size_t in_col = w_out * 2;
 
 				float maxVal = input.pData[c * H * W + in_row * W + in_col];
+				size_t maxIndex = c * H * W + in_row * W + in_col;
 
-				//
+				for (int r = 0; r < 2; r++)
+				{
+					for (int s = 0; s < 2; s++)
+					{
+						float val = input.pData[c * H * W + (in_row + r) * W + (in_col + s)];
 
-				out.pData[c * H_out * W_out + h_out * W_out + w_out] = maxVal;
+						if (val > maxVal)
+						{
+							maxVal = val;
+							maxIndex = c * H * W + (in_row + r) * W + (in_col + s);
+						}
+					}
+				}
+
+				size_t outIdx = c * H_out * W_out + h_out * W_out + w_out;
+
+				out.pData[outIdx] = maxVal;
+				cache.indices[outIdx] = maxIndex;
 			}
 		}
 	}
