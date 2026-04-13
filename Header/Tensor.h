@@ -2,15 +2,6 @@
 #include<vector>
 #include<cstddef>
 
-struct View2D
-{
-	float* data;
-	size_t rows;
-	size_t cols;
-	ptrdiff_t stride_row;
-	ptrdiff_t stride_col;
-};
-
 struct Tensor 
 {
 	float* pData;
@@ -19,9 +10,7 @@ struct Tensor
 
 	Tensor(const std::vector<size_t>& shape);
 
-	Tensor im2col(size_t R, size_t S) const;
-
-	inline void RELU();
+	void RELU();
 
 	void zeros();
 
@@ -32,10 +21,19 @@ struct Tensor
 	~Tensor();
 };
 
-void add(const Tensor& a, const Tensor& b, Tensor& out);
+struct MaxPoolCache
+{
+	std::vector<size_t> indices;
+};
 
-void GEMM(const Tensor& a, const Tensor& b, Tensor& out);
+Tensor add(const Tensor& a, const Tensor& b);
+
+Tensor im2col(const Tensor& input, size_t R, size_t S);
+
+Tensor GEMM(const Tensor& a, const Tensor& b);
 
 Tensor reshape(const Tensor& input, const std::vector<size_t>& newShape);
 
 Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias);
+
+Tensor MaxPool(const Tensor& input, MaxPoolCache& cache);

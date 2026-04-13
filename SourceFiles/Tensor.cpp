@@ -18,13 +18,12 @@ Tensor::~Tensor()
 	free(pData);
 }
 
-void add(const Tensor& a, const Tensor& b, Tensor& out)
+Tensor add(const Tensor& a, const Tensor& b)
 {
 	if (a.numel != b.numel)
 		throw std::runtime_error("add : numel mismatch");
 
-	if (out.numel != a.numel)
-		throw std::runtime_error("add : output size mismatch");
+	Tensor out(a.shape);
 
 	for (size_t i = 0; i < a.numel; i++)
 	{
@@ -32,15 +31,17 @@ void add(const Tensor& a, const Tensor& b, Tensor& out)
 	}
 }
 
-void GEMM(const Tensor& a, const Tensor& b, Tensor& out)
+Tensor GEMM(const Tensor& a, const Tensor& b)
 {
-	if (a.shape.size() != 2 || b.shape.size() != 2 || out.shape.size() != 2)
+	if (a.shape.size() != 2 || b.shape.size() != 2)
 		throw std::runtime_error("GEMM : only 2D tensors supported");
 
 	size_t m = a.shape[0];
 	size_t kA = a.shape[1];
 	size_t kB = b.shape[0];
 	size_t n = b.shape[1];
+
+	Tensor out({ m, n });
 
 	if (out.shape[0] != m || out.shape[1] != n)
 		throw std::runtime_error("GEMM : output shape mismatch");
@@ -126,11 +127,11 @@ void GEMM(const Tensor& a, const Tensor& b, Tensor& out)
 	*/
 }
 
-Tensor Tensor::im2col(size_t R, size_t S) const
+Tensor im2col(const Tensor& input, size_t R, size_t S)
 {
-	size_t C = shape[0];
-	size_t H = shape[1];
-	size_t W = shape[2];
+	size_t C = input.shape[0];
+	size_t H = input.shape[1];
+	size_t W = input.shape[2];
 
 	size_t H_out = H - R + 1;
 	size_t W_out = W - S + 1;
@@ -159,7 +160,7 @@ Tensor Tensor::im2col(size_t R, size_t S) const
 						size_t in_row = h_out + r;
 						size_t in_col = w_out + s;
 
-						outData[row * outCols + col] = pData[c * H * W + in_row * W + in_col];
+						outData[row * outCols + col] = input.pData[c * H * W + in_row * W + in_col];
 					}
 				}
 			}
@@ -169,12 +170,78 @@ Tensor Tensor::im2col(size_t R, size_t S) const
 	return out;
 }
 
+Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias)
+{
+	size_t H = input.shape[1];
+	size_t W = input.shape[2];
+
+	size_t K = weights.shape[0];
+	size_t C = weights.shape[1];
+	size_t R = weights.shape[2];
+	size_t S = weights.shape[3];
+
+	size_t H_out = H - R + 1;
+	size_t W_out = W - S + 1;
+
+	Tensor col = im2col(input, R, S);
+	Tensor w_flat = reshape(weights, { K, C * R * S });
+
+	Tensor out({ K, H_out * W_out });
+
+	 out = GEMM(w_flat, col);
+
+	for (size_t k = 0; k < K; k++)
+	{
+		float b = bias.pData[k];
+		float* row = out.pData + k * (H_out * W_out);
+
+		for (size_t i = 0; i < H_out * W_out; i++)
+		{
+			row[i] += b;
+		}
+	}
+
+	return reshape(out, { K, H_out, W_out });
+}
+
 void Tensor::RELU()
 {
 	for (size_t i = 0; i < numel; i++)
 	{
 		pData[i] = std::max(pData[i], 0.0f);
 	}
+}
+
+Tensor MaxPool(const Tensor& input, MaxPoolCache& cache)
+{
+	size_t C = input.shape[0];
+	size_t H = input.shape[1];
+	size_t W = input.shape[2];
+
+	size_t H_out = H / 2;
+	size_t W_out = W / 2;
+
+	Tensor out({ C, H_out, W_out });
+
+	for (size_t c = 0; c < C; c++)
+	{
+		for (size_t h_out = 0; h_out < H_out; h_out++)
+		{
+			for (size_t w_out = 0; w_out < W_out; w_out++)
+			{
+				size_t in_row = h_out * 2;
+				size_t in_col = w_out * 2;
+
+				float maxVal = input.pData[c * H * W + in_row * W + in_col];
+
+				//
+
+				out.pData[c * H_out * W_out + h_out * W_out + w_out] = maxVal;
+			}
+		}
+	}
+
+	return out;
 }
 
 Tensor reshape(const Tensor& input, const std::vector<size_t>& newShape)
@@ -194,40 +261,6 @@ Tensor reshape(const Tensor& input, const std::vector<size_t>& newShape)
 	std::copy(input.pData, input.pData + input.numel, out.pData);
 
 	return out;
-}
-
-Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias)
-{
-	size_t H = input.shape[1];
-	size_t W = input.shape[2];
-
-	size_t K = weights.shape[0];
-	size_t C = weights.shape[1];
-	size_t R = weights.shape[2];
-	size_t S = weights.shape[3];
-
-	size_t H_out = H - R + 1;
-	size_t W_out = W - S + 1;
-
-	Tensor col = input.im2col(R, S);
-	Tensor w_flat = reshape(weights, { K, C * R * S });
-
-	Tensor out({ K, H_out * W_out });
-
-	GEMM(w_flat, col, out);
-
-	for (size_t k = 0; k < K; k++)
-	{
-		float b = bias.pData[k];
-		float* row = out.pData + k * (H_out * W_out);
-
-		for (size_t i = 0; i < H_out * W_out; i++)
-		{
-			row[i] += b;
-		}
-	}
-
-	return reshape(out, { K, H_out, W_out });
 }
 
 void Tensor::zeros()

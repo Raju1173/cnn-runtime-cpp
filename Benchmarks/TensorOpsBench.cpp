@@ -6,7 +6,6 @@ void BenchGEMM(size_t N)
 {
     Tensor A({ N,N });
     Tensor B({ N,N });
-    Tensor C({ N,N });
 
     A.fillRandom();
     B.fillRandom();
@@ -17,7 +16,7 @@ void BenchGEMM(size_t N)
 
     for (int i = 0;i < runs;i++)
     {
-        GEMM(A, B, C);
+        GEMM(A, B);
     }
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -43,7 +42,7 @@ void BenchIm2Col(size_t N)
 
 	for (int i = 0;i < runs;i++)
 	{
-		input.im2col(3, 3);
+		im2col(input, 3, 3);
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();
@@ -55,6 +54,13 @@ void BenchIm2Col(size_t N)
 
 int main()
 {
+	std::cout << "Benchmarking GEMM:\n";
+    BenchGEMM(64);
+    BenchGEMM(128);
+    BenchGEMM(256);
+    BenchGEMM(512);
+
+    std::cout << "\nBenchmarking Im2Col:\n";
     BenchIm2Col(64);
     BenchIm2Col(128);
     BenchIm2Col(256);
