@@ -21,19 +21,21 @@ struct Tensor
 	~Tensor();
 };
 
-struct MaxPoolCache
-{
-	std::vector<size_t> indices;
-};
+Tensor Add(const Tensor& a, const Tensor& b);
 
-Tensor add(const Tensor& a, const Tensor& b);
-
-Tensor im2col(const Tensor& input, size_t R, size_t S);
+Tensor Im2col(const Tensor& input, size_t R, size_t S);
 
 Tensor GEMM(const Tensor& a, const Tensor& b);
 
-Tensor reshape(const Tensor& input, const std::vector<size_t>& newShape);
-
-Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias);
+Tensor Conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias);
 
 Tensor MaxPool(const Tensor& input, MaxPoolCache& cache);
+
+Tensor Reshape(const Tensor& input, const std::vector<size_t>& newShape); // This should not be copying memory. So basically, implement strides in the future...
+
+Tensor Linear(const Tensor& input, const Tensor& weights, const Tensor& bias);
+
+struct MaxPoolCache // This is not supposed to be here but just for now for convenience...
+{
+	std::vector<size_t> indices;
+};

@@ -18,7 +18,7 @@ Tensor::~Tensor()
 	free(pData);
 }
 
-Tensor add(const Tensor& a, const Tensor& b)
+Tensor Add(const Tensor& a, const Tensor& b)
 {
 	if (a.numel != b.numel)
 		throw std::runtime_error("add : numel mismatch");
@@ -127,7 +127,7 @@ Tensor GEMM(const Tensor& a, const Tensor& b)
 	*/
 }
 
-Tensor im2col(const Tensor& input, size_t R, size_t S)
+Tensor Im2col(const Tensor& input, size_t R, size_t S)
 {
 	size_t C = input.shape[0];
 	size_t H = input.shape[1];
@@ -170,7 +170,7 @@ Tensor im2col(const Tensor& input, size_t R, size_t S)
 	return out;
 }
 
-Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias)
+Tensor Conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias)
 {
 	size_t H = input.shape[1];
 	size_t W = input.shape[2];
@@ -183,8 +183,8 @@ Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& b
 	size_t H_out = H - R + 1;
 	size_t W_out = W - S + 1;
 
-	Tensor col = im2col(input, R, S);
-	Tensor w_flat = reshape(weights, { K, C * R * S });
+	Tensor col = Im2col(input, R, S);
+	Tensor w_flat = Reshape(weights, { K, C * R * S });
 
 	Tensor out({ K, H_out * W_out });
 
@@ -201,7 +201,7 @@ Tensor conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& b
 		}
 	}
 
-	return reshape(out, { K, H_out, W_out });
+	return Reshape(out, { K, H_out, W_out });
 }
 
 void Tensor::RELU()
@@ -262,7 +262,7 @@ Tensor MaxPool(const Tensor& input, MaxPoolCache& cache)
 	return out;
 }
 
-Tensor reshape(const Tensor& input, const std::vector<size_t>& newShape)
+Tensor Reshape(const Tensor& input, const std::vector<size_t>& newShape)
 {
 	size_t newNumel = 1;
 
@@ -277,6 +277,26 @@ Tensor reshape(const Tensor& input, const std::vector<size_t>& newShape)
 	Tensor out(newShape);
 
 	std::copy(input.pData, input.pData + input.numel, out.pData);
+
+	return out;
+}
+
+Tensor Linear(const Tensor& input, const Tensor& weights, const Tensor& bias)
+{
+	if (input.shape.size() != 1 || weights.shape.size() != 2 || bias.shape.size() != 1)
+		throw std::runtime_error("Linear : only 1D input, 2D weights and 1D bias supported");
+
+	size_t inFeatures = input.shape[0];
+	size_t outFeatures = weights.shape[0];
+
+	if (weights.shape[1] != inFeatures || bias.shape[0] != outFeatures)
+		throw std::runtime_error("Linear : shape mismatch");
+
+	Tensor out({ outFeatures });
+
+	out = Reshape(GEMM(weights, Reshape(input, { inFeatures, 1 })), {outFeatures});
+
+	out = Add(out, bias);
 
 	return out;
 }
