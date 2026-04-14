@@ -21,13 +21,13 @@ public :
 	~Tensor();
 };
 
-std::ostream& operator << (std::ostream& os, const Tensor& t);
+std::ostream& operator << (std::ostream& os, const Tensor& T);
 
-Tensor Add(const Tensor& a, const Tensor& b);
+Tensor Add(const Tensor& A, const Tensor& B);
 
 Tensor Im2col(const Tensor& input, size_t R, size_t S);
 
-Tensor GEMM(const Tensor& a, const Tensor& b);
+Tensor GEMM(const Tensor& A, const Tensor& B);
 
 Tensor Conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias);
 

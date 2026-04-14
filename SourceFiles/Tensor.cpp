@@ -18,28 +18,28 @@ Tensor::~Tensor()
 	free(pData);
 }
 
-Tensor Add(const Tensor& a, const Tensor& b)
+Tensor Add(const Tensor& A, const Tensor& B)
 {
-	if (a.numel != b.numel)
+	if (A.numel != B.numel)
 		throw std::runtime_error("add : numel mismatch");
 
-	Tensor out(a.shape);
+	Tensor out(A.shape);
 
-	for (size_t i = 0; i < a.numel; i++)
+	for (size_t i = 0; i < A.numel; i++)
 	{
-		out.pData[i] = a.pData[i] + b.pData[i];
+		out.pData[i] = A.pData[i] + B.pData[i];
 	}
 }
 
-Tensor GEMM(const Tensor& a, const Tensor& b)
+Tensor GEMM(const Tensor& A, const Tensor& B)
 {
-	if (a.shape.size() != 2 || b.shape.size() != 2)
+	if (A.shape.size() != 2 || B.shape.size() != 2)
 		throw std::runtime_error("GEMM : only 2D tensors supported");
 
-	size_t m = a.shape[0];
-	size_t kA = a.shape[1];
-	size_t kB = b.shape[0];
-	size_t n = b.shape[1];
+	size_t m = A.shape[0];
+	size_t kA = A.shape[1];
+	size_t kB = B.shape[0];
+	size_t n = B.shape[1];
 
 	Tensor out({ m, n });
 
@@ -73,8 +73,8 @@ Tensor GEMM(const Tensor& a, const Tensor& b)
 
 					for (size_t k = kk; k < k_max; k++)
 					{
-						float aik = a.pData[i * kA + k];
-						float* bRow = b.pData + k * n;
+						float aik = A.pData[i * kA + k];
+						float* bRow = B.pData + k * n;
 
 						for (size_t j = jj; j < j_max; j++)
 						{
@@ -95,8 +95,8 @@ Tensor GEMM(const Tensor& a, const Tensor& b)
 
 		for (size_t k = 0; k < kA; k++)
 		{
-			float aik = a.pData[i * kA + k];
-			float* bRow = b.pData + k * n;
+			float aik = A.pData[i * kA + k];
+			float* bRow = B.pData + k * n;
 
 			for (size_t j = 0; j < n; j++)
 			{
@@ -117,7 +117,7 @@ Tensor GEMM(const Tensor& a, const Tensor& b)
 
 			for (size_t k = 0; k < kA; k++)
 			{
-				sum += a.pData[i * kA + k] * b.pData[k * n + j];
+				sum += A.pData[i * kA + k] * B.pData[k * n + j];
 			}
 
 			out.pData[i * n + j] = sum;
@@ -193,12 +193,12 @@ Tensor Conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& b
 
 	for (size_t k = 0; k < K; k++)
 	{
-		float b = bias.pData[k];
+		float B = bias.pData[k];
 		float* row = out.pData + k * (H_out * W_out);
 
 		for (size_t i = 0; i < H_out * W_out; i++)
 		{
-			row[i] += b;
+			row[i] += B;
 		}
 	}
 
@@ -318,18 +318,18 @@ void Tensor::fillRandom()
 	}
 }
 
-std::ostream& operator<<(std::ostream& os, const Tensor& t)
+std::ostream& operator<<(std::ostream& os, const Tensor& T)
 {
-	if (t.shape.size() == 2)
+	if (T.shape.size() == 2)
 	{
-		size_t rows = t.shape[0];
-		size_t cols = t.shape[1];
+		size_t rows = T.shape[0];
+		size_t cols = T.shape[1];
 
 		for (size_t i = 0; i < rows; i++)
 		{
 			for (size_t j = 0; j < cols; j++)
 			{
-				os << t.pData[i * cols + j] << " ";
+				os << T.pData[i * cols + j] << " ";
 			}
 
 			os << "\n";
@@ -338,9 +338,9 @@ std::ostream& operator<<(std::ostream& os, const Tensor& t)
 
 	else
 	{
-		for (size_t i = 0; i < t.numel; i++)
+		for (size_t i = 0; i < T.numel; i++)
 		{
-			os << t.pData[i] << " ";
+			os << T.pData[i] << " ";
 		}
 
 		os << "\n";
