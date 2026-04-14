@@ -205,11 +205,11 @@ Tensor Conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& b
 	return Reshape(out, { K, H_out, W_out });
 }
 
-void Tensor::RELU()
+void RELU(const Tensor& input)
 {
-	for (size_t i = 0; i < numel; i++)
+	for (size_t i = 0; i < input.numel; i++)
 	{
-		pData[i] = std::max(pData[i], 0.0f);
+		input.pData[i] = std::max(input.pData[i], 0.0f);
 	}
 }
 

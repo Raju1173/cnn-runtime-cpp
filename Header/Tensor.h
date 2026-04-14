@@ -8,11 +8,10 @@ class Tensor
 public :
 	float* pData;
 	std::vector<size_t> shape;
+	std::vector<size_t> strides;
 	size_t numel;
 
 	Tensor(const std::vector<size_t>& shape);
-
-	void RELU();
 
 	void zeros();
 
@@ -30,6 +29,8 @@ Tensor Im2col(const Tensor& input, size_t R, size_t S);
 Tensor GEMM(const Tensor& A, const Tensor& B);
 
 Tensor Conv2DForward(const Tensor& input, const Tensor& weights, const Tensor& bias);
+
+void RELU(const Tensor& input);
 
 struct MaxPoolCache // This is not supposed to be here but just for now for convenience...
 {
