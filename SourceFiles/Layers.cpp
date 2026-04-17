@@ -29,7 +29,7 @@ void Conv2D::forward(const Tensor& inp, Tensor& out)
 	size_t H_out = H - R + 1;
 	size_t W_out = W - S + 1;
 
-	if (out.shape[0] != K || out.shape[1] != H_out * W_out)
+	if (out.shape[0] != K || out.shape[1] != H_out || out.shape[2] != W_out)
 		throw std::runtime_error("Conv2D: output shape mismatch");
 
 	this->col = Tensor({ C * R * S, H_out * W_out });
@@ -37,6 +37,8 @@ void Conv2D::forward(const Tensor& inp, Tensor& out)
 	Im2col(input, R, S, this->col);
 
 	Tensor w_flat = Reshape(weights, { K, C * R * S });
+
+	out.shape = { K, H_out * W_out };
 
 	GEMM(w_flat, col, out);
 
@@ -51,7 +53,7 @@ void Conv2D::forward(const Tensor& inp, Tensor& out)
 		}
 	}
 
-	out = Reshape(out, { K, H_out, W_out });
+	out.shape = { K, H_out, W_out };
 }
 
 void MaxPool::forward(const Tensor& input, Tensor& out)
