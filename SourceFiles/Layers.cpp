@@ -36,11 +36,11 @@ void Conv2D::forward(const Tensor& inp, Tensor& out)
 
 	Im2col(input, R, S, this->col);
 
-	Tensor w_flat = Reshape(weights, { K, C * R * S });
+	weights.shape = { K, C * R * S };
 
 	out.shape = { K, H_out * W_out };
 
-	GEMM(w_flat, col, out);
+	GEMM(weights, col, out);
 
 	for (size_t k = 0; k < K; k++)
 	{
@@ -52,6 +52,8 @@ void Conv2D::forward(const Tensor& inp, Tensor& out)
 			row[i] += B;
 		}
 	}
+
+	weights.shape = { K, C, R, S };
 
 	out.shape = { K, H_out, W_out };
 }
@@ -110,8 +112,10 @@ Linear::Linear(size_t inFeatures, size_t outFeatures) : weights({ outFeatures, i
 	bias.fillRandom();
 }
 
-void Linear::forward(const Tensor& input, Tensor& out)
+void Linear::forward(Tensor& inp, Tensor& out)
 {
+	this->input = inp;
+
 	if (input.shape.size() != 1 || weights.shape.size() != 2 || bias.shape.size() != 1)
 		throw std::runtime_error("Linear : only 1D input, 2D weights and 1D bias supported");
 
@@ -121,9 +125,11 @@ void Linear::forward(const Tensor& input, Tensor& out)
 	if (weights.shape[1] != inFeatures || bias.shape[0] != outFeatures)
 		throw std::runtime_error("Linear : shape mismatch");
 
-	GEMM(weights, Reshape(input, { inFeatures, 1 }), out);
+	inp.shape = { inFeatures, 1 };
 
-	out = Reshape(out, {outFeatures});
+	GEMM(weights, inp, out);
+
+	out.shape = {outFeatures};
 
 	Add(out, bias, out);
 }

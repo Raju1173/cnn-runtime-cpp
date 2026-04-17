@@ -13,6 +13,32 @@ Tensor::Tensor(const std::vector<size_t>& shape) : shape(shape), pData(nullptr),
 	pData = (float*)std::malloc(numel * sizeof(float));
 }
 
+Tensor::Tensor(const Tensor& other) : shape(other.shape), numel(other.numel), pData(nullptr)
+{
+	pData = (float*)std::malloc(numel * sizeof(float));
+	std::copy(other.pData, other.pData + numel, pData);
+}
+
+Tensor::Tensor(Tensor&& other) noexcept : shape(std::move(other.shape)), numel(other.numel), pData(other.pData)
+{
+	other.pData = nullptr;
+	other.numel = 0;
+}
+
+Tensor& Tensor::operator = (const Tensor& other)
+{
+	if (this != &other)
+	{
+		free(pData);
+		shape = other.shape;
+		numel = other.numel;
+		pData = (float*)std::malloc(numel * sizeof(float));
+		std::copy(other.pData, other.pData + numel, pData);
+	}
+
+	return *this;
+}
+
 Tensor::~Tensor()
 {
 	free(pData);

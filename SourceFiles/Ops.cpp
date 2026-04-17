@@ -143,20 +143,3 @@ void GEMM(const Tensor& A, const Tensor& B, Tensor& out)
 	}
 	*/
 }
-
-Tensor Reshape(const Tensor& input, const std::vector<size_t>& newShape)
-{
-	size_t newNumel = 1;
-
-	for (size_t dim : newShape)
-		newNumel *= dim;
-
-	if (newNumel != input.numel)
-		throw std::runtime_error("Reshape : numel mismatch");
-
-	Tensor out(newShape);
-
-	std::copy(input.pData, input.pData + input.numel, out.pData);
-
-	return out;
-}

@@ -38,5 +38,5 @@ public:
 
     Linear(size_t inFeatures, size_t outFeatures);
 
-    void forward(const Tensor& input, Tensor& out);
+    void forward(Tensor& input, Tensor& out);
 };
