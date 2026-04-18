@@ -4,8 +4,9 @@
 
 void BenchGEMM(size_t N)
 {
-    Tensor A({ N,N });
-    Tensor B({ N,N });
+    Tensor A({ N, N });
+    Tensor B({ N, N });
+    Tensor C({ N, N });
 
     A.fillRandom();
     B.fillRandom();
@@ -16,7 +17,7 @@ void BenchGEMM(size_t N)
 
     for (int i = 0;i < runs;i++)
     {
-        GEMM(A, B, Tensor({N, N}));
+        GEMM(A, B, C);
     }
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -32,7 +33,7 @@ void BenchIm2Col(size_t N)
 	Tensor weights({ 64,3,3,3 });
 	Tensor bias({ 64 });
 
-	Tensor output({ 64, (N - 3 + 1) * (N - 3 + 1) });
+	Tensor output({ 64, (N - 2) * (N - 2) });
 
 	input.fillRandom();
 	weights.fillRandom();
