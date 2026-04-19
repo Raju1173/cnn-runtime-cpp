@@ -1,10 +1,20 @@
 #include "Layers.h"
 
-void ReLU::forward(Tensor& input)
+void ReLU::forward(Tensor& inp)
 {
+	this->input = inp;
+
 	for (size_t i = 0; i < input.numel; i++)
 	{
 		input.pData[i] = std::max(input.pData[i], 0.0f);
+	}
+}
+
+void ReLU::backward(Tensor& grad_out, Tensor& grad_input)
+{
+	for (size_t i = 0; i < input.numel; i++)
+	{
+		grad_input.pData[i] = (input.pData[i] > 0) * grad_out.pData[i];
 	}
 }
 
