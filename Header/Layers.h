@@ -2,8 +2,11 @@
 
 class ReLU
 {
+    Tensor input;
+
 public:
-    void forward(Tensor& input);
+    void forward(Tensor& inp);
+    void backward(Tensor& gradOutput, Tensor& gradInput);
 };
 
 class Conv2D
@@ -38,5 +41,5 @@ public:
 
     Linear(size_t inFeatures, size_t outFeatures);
 
-    void forward(Tensor& input, Tensor& out);
+    void forward(Tensor& inp, Tensor& out);
 };
