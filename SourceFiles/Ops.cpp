@@ -1,15 +1,14 @@
 #include "Ops.h"
 #include <stdexcept>
+#include <algorithm>
 
 void Add(const Tensor& a, const Tensor& b, Tensor& out)
 {
 	if (a.numel != b.numel || a.numel != out.numel)
-		throw std::runtime_error("add : numel mismatch");
+		throw std::runtime_error("Add: numel mismatch");
 
 	for (size_t i = 0; i < a.numel; i++)
-	{
 		out.pData[i] = a.pData[i] + b.pData[i];
-	}
 }
 
 void Im2col(const Tensor& input, size_t R, size_t S, Tensor& out)
@@ -20,11 +19,7 @@ void Im2col(const Tensor& input, size_t R, size_t S, Tensor& out)
 
 	size_t H_out = H - R + 1;
 	size_t W_out = W - S + 1;
-
-	size_t outRows = C * R * S;
 	size_t outCols = H_out * W_out;
-
-	float* outData = out.pData;
 
 	for (size_t c = 0; c < C; c++)
 	{
@@ -39,11 +34,44 @@ void Im2col(const Tensor& input, size_t R, size_t S, Tensor& out)
 					for (size_t w_out = 0; w_out < W_out; w_out++)
 					{
 						size_t col = h_out * W_out + w_out;
+						size_t h_in = h_out + r;
+						size_t w_in = w_out + s;
 
-						size_t in_row = h_out + r;
-						size_t in_col = w_out + s;
+						out.pData[row * outCols + col] =
+							input.pData[c * H * W + h_in * W + w_in];
+					}
+				}
+			}
+		}
+	}
+}
 
-						outData[row * outCols + col] = input.pData[c * H * W + in_row * W + in_col];
+void Col2im(const Tensor& grad_col, size_t C, size_t H, size_t W, size_t R, size_t S, Tensor& grad_input)
+{
+	size_t H_out = H - R + 1;
+	size_t W_out = W - S + 1;
+	size_t N_out = H_out * W_out;
+
+	for (size_t i = 0; i < grad_input.numel; i++)
+		grad_input.pData[i] = 0.0f;
+
+	for (size_t c = 0; c < C; c++)
+	{
+		for (size_t r = 0; r < R; r++)
+		{
+			for (size_t s = 0; s < S; s++)
+			{
+				size_t p = c * R * S + r * S + s;
+
+				for (size_t h_out = 0; h_out < H_out; h_out++)
+				{
+					for (size_t w_out = 0; w_out < W_out; w_out++)
+					{
+						size_t n = h_out * W_out + w_out;
+						size_t h_in = h_out + r;
+						size_t w_in = w_out + s;
+
+						grad_input.pData[c * H * W + h_in * W + w_in] += grad_col.pData[p * N_out + n];
 					}
 				}
 			}
@@ -142,4 +170,13 @@ void GEMM(const Tensor& A, const Tensor& B, Tensor& out)
 		}
 	}
 	*/
+}
+
+void SGD(Tensor& param, const Tensor& grad, float lr)
+{
+	if (param.numel != grad.numel)
+		throw std::runtime_error("SGD: param and grad have different numel");
+
+	for (size_t i = 0; i < param.numel; i++)
+		param.pData[i] -= lr * grad.pData[i];
 }
