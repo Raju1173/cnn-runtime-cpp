@@ -17,11 +17,10 @@ void ReLU::backward(Tensor& outGrad, Tensor& inGrad)
 		inGrad.pData[i] = (input.pData[i] > 0.0f) ? outGrad.pData[i] : 0.0f;
 }
 
-Conv2D::Conv2D(size_t inChannels, size_t outChannels, size_t kernelSize)
-	: weights({ outChannels, inChannels, kernelSize, kernelSize }), bias({ outChannels })
+Conv2D::Conv2D(size_t inChannels, size_t outChannels, size_t kernelSize) : weights({ outChannels, inChannels, kernelSize, kernelSize }), bias({ outChannels })
 {
 	weights.fillRandom();
-	bias.fillRandom();
+	bias.zeros();
 }
 
 void Conv2D::forward(const Tensor& inp, Tensor& out)
@@ -42,7 +41,8 @@ void Conv2D::forward(const Tensor& inp, Tensor& out)
 	if (out.shape[0] != K || out.shape[1] != H_out || out.shape[2] != W_out)
 		throw std::runtime_error("Conv2D: output shape mismatch");
 
-	this->col = Tensor({ C * R * S, H_out * W_out });
+	this->col = Tensor({ C * R * S, H_out * W_out }); // This should be prellocated somehow...
+
 	Im2col(input, R, S, this->col);
 
 	weights.shape = { K, C * R * S };
@@ -62,8 +62,7 @@ void Conv2D::forward(const Tensor& inp, Tensor& out)
 	out.shape = { K, H_out, W_out };
 }
 
-void Conv2D::backward(const Tensor& outGrad, Tensor& inGrad,
-	Tensor& gradWeights, Tensor& gradBiases)
+void Conv2D::backward(const Tensor& outGrad, Tensor& inGrad, Tensor& gradWeights, Tensor& gradBiases)
 {
 	size_t H = input.shape[1];
 	size_t W = input.shape[2];
@@ -103,7 +102,7 @@ void Conv2D::backward(const Tensor& outGrad, Tensor& inGrad,
 
 	gradWeights.shape = { K, C, R, S };
 
-	Tensor grad_col({ C * R * S, N_out });
+	Tensor grad_col({ C * R * S, N_out }); // This should be prellocated somehow...
 
 	weights.shape = { K, C * R * S };
 
@@ -180,7 +179,7 @@ Linear::Linear(size_t inFeatures, size_t outFeatures)
 	: weights({ outFeatures, inFeatures }), bias({ outFeatures })
 {
 	weights.fillRandom();
-	bias.fillRandom();
+	bias.zeros();
 }
 
 void Linear::forward(Tensor& inp, Tensor& out)
