@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <random>
 
 Tensor::Tensor(const std::vector<size_t>& shape) : shape(shape), pData(nullptr), numel(1)
 {
@@ -52,12 +53,11 @@ void Tensor::zeros()
 	}
 }
 
-void Tensor::fillRandom()
+void Tensor::fillRandom(size_t fanIn)
 {
-	for (size_t i = 0; i < numel; i++)
-	{
-		pData[i] = 2.0f * (static_cast<float>(rand()) / RAND_MAX) - 1.0f;
-	}
+	static std::mt19937 rng(42);
+	std::normal_distribution<float> dist(0.0f, std::sqrt(2.0f / static_cast<float>(fanIn)));
+	for (size_t i = 0; i < numel; i++) pData[i] = dist(rng);
 }
 
 std::ostream& operator << (std::ostream& os, const Tensor& T)

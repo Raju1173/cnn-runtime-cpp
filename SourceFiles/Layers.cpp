@@ -19,7 +19,7 @@ void ReLU::backward(Tensor& outGrad, Tensor& inGrad)
 
 Conv2D::Conv2D(size_t inChannels, size_t outChannels, size_t kernelSize) : weights({ outChannels, inChannels, kernelSize, kernelSize }), bias({ outChannels })
 {
-	weights.fillRandom();
+	weights.fillRandom(inChannels * kernelSize * kernelSize);
 	bias.zeros();
 }
 
@@ -175,10 +175,9 @@ void MaxPool::backward(const Tensor& outGrad, Tensor& inGrad)
 		inGrad.pData[indices[i]] += outGrad.pData[i];
 }
 
-Linear::Linear(size_t inFeatures, size_t outFeatures)
-	: weights({ outFeatures, inFeatures }), bias({ outFeatures })
+Linear::Linear(size_t inFeatures, size_t outFeatures) : weights({ outFeatures, inFeatures }), bias({ outFeatures })
 {
-	weights.fillRandom();
+	weights.fillRandom(inFeatures);
 	bias.zeros();
 }
 
@@ -206,8 +205,7 @@ void Linear::forward(Tensor& inp, Tensor& out)
 	Add(out, bias, out);
 }
 
-void Linear::backward(const Tensor& outGrad, Tensor& inGrad,
-	Tensor& gradWeights, Tensor& gradBiases)
+void Linear::backward(const Tensor& outGrad, Tensor& inGrad, Tensor& gradWeights, Tensor& gradBiases)
 {
 	size_t inFeatures = weights.shape[1];
 	size_t outFeatures = weights.shape[0];

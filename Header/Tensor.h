@@ -19,7 +19,7 @@ public :
 
 	void zeros();
 
-	void fillRandom();
+	void fillRandom(size_t fanIn);
 
 	~Tensor();
 };
