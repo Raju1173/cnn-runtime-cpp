@@ -25,3 +25,6 @@ public :
 };
 
 std::ostream& operator << (std::ostream& os, const Tensor& T);
+
+void SaveTensors(const std::vector<Tensor*>& tensors, const std::string& filename);
+void LoadTensors(std::vector<Tensor*>& tensors, const std::string& filename);

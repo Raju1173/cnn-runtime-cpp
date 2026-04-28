@@ -57,7 +57,8 @@ void Tensor::fillRandom(size_t fanIn)
 {
 	static std::mt19937 rng(42);
 	std::normal_distribution<float> dist(0.0f, std::sqrt(2.0f / static_cast<float>(fanIn)));
-	for (size_t i = 0; i < numel; i++) pData[i] = dist(rng);
+	for (size_t i = 0; i < numel; i++)
+		pData[i] = dist(rng);
 }
 
 std::ostream& operator << (std::ostream& os, const Tensor& T)
@@ -89,4 +90,58 @@ std::ostream& operator << (std::ostream& os, const Tensor& T)
 	}
 
 	return os;
+}
+
+void SaveTensors(const std::vector<Tensor*>& tensors, const std::string& filename)
+{
+	FILE* file = fopen(filename.c_str(), "wb");
+
+	if (!file)
+		throw std::runtime_error("Failed to open file for writing");
+
+	size_t numTensors = tensors.size();
+	fwrite(&numTensors, sizeof(size_t), 1, file);
+
+	for (const Tensor* tensor : tensors)
+	{
+		size_t numDims = tensor->shape.size();
+
+		fwrite(&numDims, sizeof(size_t), 1, file);
+		fwrite(tensor->shape.data(), sizeof(size_t), numDims, file);
+		fwrite(tensor->pData, sizeof(float), tensor->numel, file);
+	}
+
+	fclose(file);
+}
+
+void LoadTensors(std::vector<Tensor*>& tensors, const std::string& filename)
+{
+	FILE* file = fopen(filename.c_str(), "rb");
+
+	if (!file)
+		throw std::runtime_error("Failed to open file for reading");
+
+	size_t numTensors;
+	fread(&numTensors, sizeof(size_t), 1, file);
+
+	if (numTensors != tensors.size())
+		throw std::runtime_error("Tensor count mismatch");
+
+	for (size_t i = 0; i < numTensors; i++)
+	{
+		size_t numDims;
+		fread(&numDims, sizeof(size_t), 1, file);
+
+		std::vector<size_t> shape(numDims);
+		fread(shape.data(), sizeof(size_t), numDims, file);
+
+		Tensor* tensor = tensors[i];
+
+		if (tensor->shape != shape)
+			throw std::runtime_error("Shape mismatch during load");
+
+		fread(tensor->pData, sizeof(float), tensor->numel, file);
+	}
+
+	fclose(file);
 }
