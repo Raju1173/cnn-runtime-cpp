@@ -1,42 +1,48 @@
-# cnn-runtime-cpp
+# Minimal CNN runtime
 
-A minimal convolutional neural network runtime built from scratch in C++.
+A small CNN runtime built from scratch in C++, including both training and real-time inference.
 
-## Motivation
+## Overview
 
-This project is an attempt to rebuild a small CNN runtime from first principles, with a focus on:
+This project rebuilds a complete CNN pipeline from first principles, focusing on :
 
-- understanding data layout and memory access
-- implementing core numerical kernels manually
-- exploring low level performance optimizations
+- low level memory control
+- cache efficient numerical kernels
+- explicit forward and backward propagation
+- end to end training without external ML libraries
 
-## What’s Implemented
-
-### Tensors
-- Manual memory management (raw pointers)
+## Features
+### Tensor Core
+- Manual memory management using raw pointers
 - Explicit shape tracking
-- Contiguous storage (row major layout)
-
-### Numerical Operations
-- Element-wise addition
-- General Matrix multiplication (GEMM)
-
+- Contiguous row major layout
+- Zero overhead indexing
 ### Optimized GEMM
-- Loop reordering for cache locality
-- Reduced indexing overhead
+- Loop reordering (ikj) for cache locality
+- Pointer reuse to eliminate redundant indexing
 - Compiler auto-vectorization
 - Cache blocking (tiling)
+### Performance:
+~25 GFLOPS on 512×512 matrix multiplication (single core)
 
-Achieved ~25 GFLOPS on 512×512 matrices on a single core.
+## Neural Network Support
+### Layers
+- Convolution (im2col + GEMM)
+- ReLU
+- Max Pooling
+- Fully Connected (Linear)
+### Training
+- Full backward propagation for all layers
+- Softmax + Cross Entropy loss
+- Stochastic Gradient Descent (SGD)
+### Data Flow
+- im2col / col2im transformations
+- Manual gradient propagation across layers
 
-### Layers & Transformations
+## Results
+ (Training\DoodlePredictor.py)
 
-- im2col
-- Reshape
-- 2D Convolution (im2col + GEMM).
-
-## GEMM Benchmarks (512×512)
-
+## Benchmarks (GEMM 512×512)
 | Version            | Time (ms) |
 |--------------------|-----------|
 | Naive (ijk)        | ~66 ms    |
@@ -44,4 +50,22 @@ Achieved ~25 GFLOPS on 512×512 matrices on a single core.
 | + pointer reuse    | ~13 ms    |
 | + blocking(64 X 64)| ~10.4 ms  |
 
-CPU : Intel(R) Core(TM) i5-13420H (13th Gen)
+CPU: Intel i5-13420H (13th Gen)
+
+## Demo (Training\DoodlePredictor.py)
+
+- Trained on a subset of Google QuickDraw (10 classes)
+- Achieved ~70% accuracy on test data
+- Supports real time inference on hand-drawn input
+
+## Future Work
+- Inference latency optimization
+- Multithreaded execution
+
+## Build
+```
+mkdir build
+cd build
+cmake ..
+make
+```
