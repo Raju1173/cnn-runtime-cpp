@@ -8,8 +8,8 @@ void BenchGEMM(size_t N)
     Tensor B({ N, N });
     Tensor C({ N, N });
 
-    A.fillRandom();
-    B.fillRandom();
+    A.fillRandom(N);
+    B.fillRandom(N);
 
     const int runs = 1000;
 
@@ -35,9 +35,9 @@ void BenchIm2Col(size_t N)
 
 	Tensor output({ 64, (N - 2) * (N - 2) });
 
-	input.fillRandom();
-	weights.fillRandom();
-	bias.fillRandom();
+	input.fillRandom(N);
+	weights.fillRandom(9);
+	bias.fillRandom(64);
 
 	const int runs = 1000;
 
@@ -60,7 +60,7 @@ void BenchConv2D(size_t N)
 	Tensor input({ 3,N,N });
 	Tensor output({ 64, N - 2, N - 2 });
 
-	input.fillRandom();
+	input.fillRandom(N);
 
 	Conv2D conv(3, 64, 3);
 
